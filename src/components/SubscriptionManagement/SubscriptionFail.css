@@ -1,0 +1,85 @@
+/* 원본 Fail.jsx과 호환되는 스타일 */
+.box_section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 40px;
+  margin: 20px auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.p-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+.p-grid-col {
+  flex: 1;
+  padding: 0 10px;
+  min-width: 200px;
+}
+
+.p-grid-col5 {
+  flex: 0 0 50%;
+  padding: 0 10px;
+  min-width: 200px;
+}
+
+.typography--p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.text--left {
+  text-align: left;
+}
+
+.text--right {
+  text-align: right;
+}
+
+.button {
+  display: inline-block;
+  padding: 12px 24px;
+  margin: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: #0056b3;
+  color: white;
+  text-decoration: none;
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .box_section {
+    padding: 20px;
+    margin: 10px;
+  }
+  
+  .p-grid-col,
+  .p-grid-col5 {
+    flex: 1 0 100%;
+    margin-bottom: 10px;
+  }
+  
+  .text--right {
+    text-align: left;
+  }
+} 

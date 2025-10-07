@@ -1,0 +1,174 @@
+/* NotificationRegistrationModal 전체화면 스타일 */
+.modal-fullscreen-lg-down .modal-dialog {
+  margin: 0;
+  max-width: none;
+  width: 100vw;
+  height: 100vh;
+}
+
+.modal-fullscreen-lg-down .modal-content {
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+}
+
+.modal-fullscreen-lg-down .modal-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-fullscreen-lg-down .modal-body {
+  padding: 1.5rem;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.modal-fullscreen-lg-down .modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* 전체화면 모달에서 탭 스타일 개선 */
+.modal-fullscreen-lg-down .nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
+.modal-fullscreen-lg-down .nav-tabs .nav-link {
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.modal-fullscreen-lg-down .nav-tabs .nav-link:hover {
+  border-color: transparent;
+  border-bottom-color: #007bff;
+  color: #007bff;
+}
+
+.modal-fullscreen-lg-down .nav-tabs .nav-link.active {
+  border-color: transparent;
+  border-bottom-color: #007bff;
+  color: #007bff;
+  background-color: transparent;
+}
+
+/* 전체화면 모달에서 폼 스타일 개선 */
+.modal-fullscreen-lg-down .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.modal-fullscreen-lg-down .form-control,
+.modal-fullscreen-lg-down .form-select {
+  border-radius: 0.5rem;
+  border: 1px solid #ced4da;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.modal-fullscreen-lg-down .form-control:focus,
+.modal-fullscreen-lg-down .form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* 전체화면 모달에서 버튼 스타일 개선 */
+.modal-fullscreen-lg-down .btn {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.modal-fullscreen-lg-down .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.modal-fullscreen-lg-down .btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.modal-fullscreen-lg-down .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.modal-fullscreen-lg-down .btn-secondary:hover {
+  background-color: #545b62;
+  border-color: #545b62;
+}
+
+/* 전체화면 모달에서 에디터 영역 스타일 */
+.modal-fullscreen-lg-down .rich-text-editor,
+.modal-fullscreen-lg-down .markdown-editor {
+  border: 1px solid #ced4da;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.modal-fullscreen-lg-down .rich-text-editor .ql-toolbar,
+.modal-fullscreen-lg-down .markdown-editor .w-md-editor-toolbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* 전체화면 모달에서 테이블 에디터 스타일 */
+.modal-fullscreen-lg-down .table-responsive {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: auto;
+  max-height: 400px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .modal-fullscreen-lg-down .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-fullscreen-lg-down .nav-tabs .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .modal-fullscreen-lg-down .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* 스크롤바 스타일 */
+.modal-fullscreen-lg-down .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-fullscreen-lg-down .modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-fullscreen-lg-down .modal-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-fullscreen-lg-down .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -1,0 +1,159 @@
+/* MarkdownEditor 스타일 */
+.markdown-editor {
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.markdown-editor .w-md-editor {
+  border: none;
+  border-radius: 0;
+}
+
+.markdown-editor .w-md-editor-toolbar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ced4da;
+  padding: 8px 12px;
+}
+
+.markdown-editor .w-md-editor-text {
+  background-color: #fff;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.markdown-editor .w-md-editor-preview {
+  background-color: #fff;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 마크다운 미리보기 스타일 */
+.markdown-editor .w-md-editor-preview h1,
+.markdown-editor .w-md-editor-preview h2,
+.markdown-editor .w-md-editor-preview h3,
+.markdown-editor .w-md-editor-preview h4,
+.markdown-editor .w-md-editor-preview h5,
+.markdown-editor .w-md-editor-preview h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.markdown-editor .w-md-editor-preview h1 {
+  font-size: 2em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 10px;
+}
+
+.markdown-editor .w-md-editor-preview h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 10px;
+}
+
+.markdown-editor .w-md-editor-preview h3 {
+  font-size: 1.25em;
+}
+
+.markdown-editor .w-md-editor-preview p {
+  margin-bottom: 16px;
+}
+
+.markdown-editor .w-md-editor-preview ul,
+.markdown-editor .w-md-editor-preview ol {
+  margin-bottom: 16px;
+  padding-left: 30px;
+}
+
+.markdown-editor .w-md-editor-preview li {
+  margin-bottom: 4px;
+}
+
+.markdown-editor .w-md-editor-preview blockquote {
+  margin: 16px 0;
+  padding: 0 16px;
+  color: #6a737d;
+  border-left: 4px solid #dfe2e5;
+}
+
+.markdown-editor .w-md-editor-preview code {
+  padding: 2px 4px;
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 85%;
+}
+
+.markdown-editor .w-md-editor-preview pre {
+  background-color: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+  margin-bottom: 16px;
+}
+
+.markdown-editor .w-md-editor-preview pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.markdown-editor .w-md-editor-preview table {
+  border-collapse: collapse;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.markdown-editor .w-md-editor-preview table th,
+.markdown-editor .w-md-editor-preview table td {
+  border: 1px solid #dfe2e5;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.markdown-editor .w-md-editor-preview table th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+}
+
+.markdown-editor .w-md-editor-preview a {
+  color: #0366d6;
+  text-decoration: none;
+}
+
+.markdown-editor .w-md-editor-preview a:hover {
+  text-decoration: underline;
+}
+
+/* 분할 모드 스타일 */
+.markdown-editor .split-mode .col-md-6:first-child {
+  border-right: 1px solid #dee2e6;
+}
+
+.markdown-editor .split-mode .bg-light {
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .markdown-editor .w-md-editor {
+    font-size: 12px;
+  }
+  
+  .markdown-editor .w-md-editor-preview {
+    padding: 12px;
+  }
+  
+  .markdown-editor .w-md-editor-preview h1 {
+    font-size: 1.5em;
+  }
+  
+  .markdown-editor .w-md-editor-preview h2 {
+    font-size: 1.25em;
+  }
+}
