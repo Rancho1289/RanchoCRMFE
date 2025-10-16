@@ -13,6 +13,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import UserProvider, { UserContext } from './components/UserContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Toaster } from 'react-hot-toast';
 
 // 부동산 CRM 컴포넌트들
 import PropertyManagement from './components/PropertyManagement/PropertyManagement';
@@ -49,6 +50,12 @@ import SubscriptionAlert from './components/SubscriptionAlert';
 
 // 환경변수 상수
 const REACT_APP_GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+// Google OAuth 설정 디버깅
+console.log('🔍 Google OAuth Debug Info:');
+console.log('- Current origin:', window.location.origin);
+console.log('- Google Client ID:', REACT_APP_GOOGLE_CLIENT_ID ? '설정됨' : '설정되지 않음');
+console.log('- Client ID 길이:', REACT_APP_GOOGLE_CLIENT_ID ? REACT_APP_GOOGLE_CLIENT_ID.length : 0);
 
 // 구독 상태 확인 함수
 const checkSubscriptionAccess = (user) => {
@@ -198,6 +205,30 @@ function App() {
     <GoogleOAuthProvider clientId={REACT_APP_GOOGLE_CLIENT_ID}>
       <UserProvider>
         <AppRoutes />
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4ade80',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
       </UserProvider>
     </GoogleOAuthProvider>
   );

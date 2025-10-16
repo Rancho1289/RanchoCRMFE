@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Badge, ListGroup, Pagination } from 'react-bootstrap';
-import { FaHome, FaUsers, FaFileAlt, FaCalendarAlt, FaChartLine, FaCog, FaPlus, FaSearch, FaMoneyBillWave, FaClock, FaMapMarkerAlt, FaUser, FaHome as FaHomeIcon, FaBuilding } from 'react-icons/fa';
+import { FaHome, FaUsers, FaFileAlt, FaCalendarAlt, FaChartLine, FaMoneyBillWave, FaClock, FaMapMarkerAlt, FaUser, FaHome as FaHomeIcon, FaNewspaper, FaExternalLinkAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import newsService from '../utils/newsService';
 import ScheduleRegistrationModal from './ScheduleManagement/ScheduleRegistrationModal';
 import CompanyInfoModal from './CompanyInfoModal';
 import { UserContext } from './UserContext';
@@ -10,7 +11,6 @@ import { UserContext } from './UserContext';
 
 const Home = () => {
     const { user } = useContext(UserContext);
-    const [isMobile, setIsMobile] = useState(false);
     const [todaySchedules, setTodaySchedules] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -41,9 +41,14 @@ const Home = () => {
     // 최근 활동 데이터 (실제 스케줄에서 가져옴)
     const [recentActivities, setRecentActivities] = useState([]);
 
+    // 뉴스 데이터
+    const [news, setNews] = useState([]);
+    const [newsLoading, setNewsLoading] = useState(false);
+
     // 페이지네이션 상태
     const [todaySchedulesPage, setTodaySchedulesPage] = useState(1);
     const [recentActivitiesPage, setRecentActivitiesPage] = useState(1);
+    const [newsPage, setNewsPage] = useState(1);
     const itemsPerPage = 3; // 페이지당 아이템 수
 
     // 페이지네이션 헬퍼 함수들
@@ -62,9 +67,9 @@ const Home = () => {
         if (totalPages <= 1) {
             return [];
         }
-        
+
         const items = [];
-        
+
         // 첫 번째 버튼
         items.push(
             <Pagination.Item
@@ -75,7 +80,7 @@ const Home = () => {
                 ≪
             </Pagination.Item>
         );
-        
+
         // 이전 버튼
         items.push(
             <Pagination.Item
@@ -86,7 +91,7 @@ const Home = () => {
                 ‹
             </Pagination.Item>
         );
-        
+
         // 현재 페이지
         items.push(
             <Pagination.Item
@@ -96,7 +101,7 @@ const Home = () => {
                 {currentPage}
             </Pagination.Item>
         );
-        
+
         // 다음 버튼
         items.push(
             <Pagination.Item
@@ -107,7 +112,7 @@ const Home = () => {
                 ›
             </Pagination.Item>
         );
-        
+
         // 마지막 버튼
         items.push(
             <Pagination.Item
@@ -134,7 +139,7 @@ const Home = () => {
                 completedDeals: true,
                 upcomingAppointments: true
             });
-            
+
             // 1. 총 매물 수 가져오기
             const propertiesResponse = await api.get('/properties?limit=1000');
             const totalProperties = propertiesResponse.data.success ? propertiesResponse.data.data.length : 0;
@@ -144,8 +149,8 @@ const Home = () => {
             // 2. 활성 고객 수 가져오기 (매수자 + 매도자)
             const buyersResponse = await api.get('/customers?type=매수자&status=활성&limit=1000');
             const sellersResponse = await api.get('/customers?type=매도자&status=활성&limit=1000');
-            const activeCustomers = (buyersResponse.data.success ? buyersResponse.data.data.length : 0) + 
-                                  (sellersResponse.data.success ? sellersResponse.data.data.length : 0);
+            const activeCustomers = (buyersResponse.data.success ? buyersResponse.data.data.length : 0) +
+                (sellersResponse.data.success ? sellersResponse.data.data.length : 0);
             setStats(prev => ({ ...prev, activeCustomers }));
             setStatsLoading(prev => ({ ...prev, activeCustomers: false }));
 
@@ -166,7 +171,7 @@ const Home = () => {
             const allContractsResponse = await api.get('/contracts?limit=1000');
             const currentMonth = new Date().getMonth() + 1;
             const currentYear = new Date().getFullYear();
-            
+
             let monthlyRevenue = 0;
             if (allContractsResponse.data.success && allContractsResponse.data.data.length > 0) {
                 // 이번 달에 체결된 완료된 계약들만 필터링
@@ -175,31 +180,31 @@ const Home = () => {
                     if (contract.status !== '완료') {
                         return false;
                     }
-                    
+
                     // 계약 날짜가 있는지 확인
                     if (!contract.contractDate) {
                         return false;
                     }
-                    
+
                     try {
                         const contractDate = new Date(contract.contractDate);
                         const contractMonth = contractDate.getMonth() + 1;
                         const contractYear = contractDate.getFullYear();
-                        
+
                         return contractMonth === currentMonth && contractYear === currentYear;
                     } catch (error) {
                         return false;
                     }
                 });
-                
+
                 monthlyRevenue = thisMonthCompletedContracts.reduce((sum, contract) => {
                     return sum + (contract.commission || 0);
                 }, 0);
             }
-            
-            setStats(prev => ({ 
-                ...prev, 
-                monthlyRevenue: monthlyRevenue > 0 ? `${monthlyRevenue.toLocaleString()}원` : '0원' 
+
+            setStats(prev => ({
+                ...prev,
+                monthlyRevenue: monthlyRevenue > 0 ? `${monthlyRevenue.toLocaleString()}원` : '0원'
             }));
             setStatsLoading(prev => ({ ...prev, monthlyRevenue: false }));
 
@@ -247,7 +252,6 @@ const Home = () => {
     const fetchRecentActivities = async () => {
         try {
             setLoading(true);
-            const today = new Date().toISOString().split('T')[0];
 
             // 현재 날짜부터 이전 날짜로 조회 (최근 30일)
             const thirtyDaysAgo = new Date();
@@ -271,22 +275,31 @@ const Home = () => {
         }
     };
 
+    // 뉴스 가져오기
+    const fetchNews = async () => {
+        try {
+            setNewsLoading(true);
+            const response = await newsService.getLatestNews(5); // 최신 뉴스 5개
+
+            if (response.success) {
+                setNews(response.data || []);
+            }
+        } catch (error) {
+            console.error('뉴스 조회 오류:', error);
+        } finally {
+            setNewsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
-        };
-
-        handleResize();
-        window.addEventListener('resize', handleResize);
-
-        // 통계 데이터, 오늘의 스케줄과 최근 활동 가져오기
+        // 통계 데이터, 오늘의 스케줄, 최근 활동, 뉴스 가져오기
         if (user && user._id) {
             fetchStats();
             fetchTodaySchedules();
             fetchRecentActivities();
+            fetchNews();
         }
-
-        return () => window.removeEventListener('resize', handleResize);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     // 사용자 정보가 없을 때 로딩 상태 표시 (리다이렉트 중일 때)
@@ -329,6 +342,23 @@ const Home = () => {
     const formatTime = (time) => {
         if (!time) return '';
         return time.substring(0, 5); // HH:MM 형식으로 변환
+    };
+
+    // 뉴스 날짜 포맷팅 (YY-MM-DD)
+    const formatNewsDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear().toString().slice(-2);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 뉴스 클릭 핸들러
+    const handleNewsClick = (newsItem) => {
+        if (newsItem.linkUrl) {
+            window.open(newsItem.linkUrl, '_blank');
+        }
     };
 
     // 스케줄 모달 관련 함수들
@@ -399,7 +429,7 @@ const Home = () => {
                     </div>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-primary h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/properties')}
@@ -424,7 +454,7 @@ const Home = () => {
                     </Card>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-success h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/customers/buyers')}
@@ -449,7 +479,7 @@ const Home = () => {
                     </Card>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-warning h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/contracts')}
@@ -474,7 +504,7 @@ const Home = () => {
                     </Card>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-info h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/sales')}
@@ -499,7 +529,7 @@ const Home = () => {
                     </Card>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-secondary h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/sales')}
@@ -524,7 +554,7 @@ const Home = () => {
                     </Card>
                 </Col>
                 <Col md={2} sm={6} className="mb-3">
-                    <Card 
+                    <Card
                         className="text-center border-danger h-100 transition-all"
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/schedule')}
@@ -552,7 +582,7 @@ const Home = () => {
 
             <Row>
                 {/* 오늘의 할 일 */}
-                <Col md={8} className="mb-4">
+                <Col md={6} className="mb-4">
                     <Card>
                         <Card.Header className="d-flex justify-content-between align-items-center">
                             <h5 className="mb-0">
@@ -579,86 +609,86 @@ const Home = () => {
                                 <>
                                     <ListGroup variant="flush">
                                         {getCurrentPageData(todaySchedules, todaySchedulesPage).map((schedule) => (
-                                        <ListGroup.Item
-                                            key={schedule._id}
-                                            className="border-0 px-0 py-2"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => handleShowScheduleModal(schedule)}
-                                        >
-                                            <div className="d-flex justify-content-between align-items-start">
-                                                <div className="flex-grow-1">
-                                                    <div className="d-flex align-items-center mb-1">
-                                                        <h6 className="mb-0 me-2">{schedule.title}</h6>
-                                                        {getTypeBadge(schedule.type)} {getPriorityBadge(schedule.priority)}
-                                                    </div>
-                                                    <div className="d-flex align-items-center mb-1">
-                                                        <FaClock className="text-muted me-1" />
-                                                        <small className="text-muted me-3">
-                                                            {formatTime(schedule.time)}
-                                                        </small>
-                                                        <FaMapMarkerAlt className="text-muted me-1" />
-                                                        <small className="text-muted">
-                                                            {schedule.location}
-                                                        </small>
-                                                    </div>
-                                                    {schedule.relatedCustomer && (
-                                                        <div className="mb-1">
-                                                            <FaUser className="text-muted me-1" />
+                                            <ListGroup.Item
+                                                key={schedule._id}
+                                                className="border-0 px-0 py-2"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => handleShowScheduleModal(schedule)}
+                                            >
+                                                <div className="d-flex justify-content-between align-items-start">
+                                                    <div className="flex-grow-1">
+                                                        <div className="d-flex align-items-center mb-1">
+                                                            <h6 className="mb-0 me-2">{schedule.title}</h6>
+                                                            {getTypeBadge(schedule.type)} {getPriorityBadge(schedule.priority)}
+                                                        </div>
+                                                        <div className="d-flex align-items-center mb-1">
+                                                            <FaClock className="text-muted me-1" />
+                                                            <small className="text-muted me-3">
+                                                                {formatTime(schedule.time)}
+                                                            </small>
+                                                            <FaMapMarkerAlt className="text-muted me-1" />
                                                             <small className="text-muted">
-                                                                {schedule.relatedCustomer.name}
+                                                                {schedule.location}
                                                             </small>
                                                         </div>
-                                                    )}
-                                                    {schedule.relatedProperty && (
-                                                        <div className="mb-1">
-                                                            <FaHomeIcon className="text-muted me-1" />
-                                                            <small className="text-muted">
-                                                                {schedule.relatedProperty.title}
+                                                        {schedule.relatedCustomer && (
+                                                            <div className="mb-1">
+                                                                <FaUser className="text-muted me-1" />
+                                                                <small className="text-muted">
+                                                                    {schedule.relatedCustomer.name}
+                                                                </small>
+                                                            </div>
+                                                        )}
+                                                        {schedule.relatedProperty && (
+                                                            <div className="mb-1">
+                                                                <FaHomeIcon className="text-muted me-1" />
+                                                                <small className="text-muted">
+                                                                    {schedule.relatedProperty.title}
+                                                                </small>
+                                                            </div>
+                                                        )}
+                                                        {schedule.description && (
+                                                            <small className="text-muted d-block">
+                                                                {schedule.description}
                                                             </small>
-                                                        </div>
-                                                    )}
-                                                    {schedule.description && (
-                                                        <small className="text-muted d-block">
-                                                            {schedule.description}
-                                                        </small>
-                                                    )}
-                                                    {schedule.status === '취소' && schedule.cancelReason && (
-                                                        <small className="text-danger d-block">
-                                                            <strong>취소 사유:</strong> {schedule.cancelReason}
-                                                        </small>
-                                                    )}
+                                                        )}
+                                                        {schedule.status === '취소' && schedule.cancelReason && (
+                                                            <small className="text-danger d-block">
+                                                                <strong>취소 사유:</strong> {schedule.cancelReason}
+                                                            </small>
+                                                        )}
+                                                    </div>
+                                                    <div className="ms-2">
+                                                        {(() => {
+                                                            let badgeColor;
+                                                            switch (schedule.status) {
+                                                                case '예정':
+                                                                    badgeColor = 'primary';
+                                                                    break;
+                                                                case '진행중':
+                                                                    badgeColor = 'warning';
+                                                                    break;
+                                                                case '완료':
+                                                                    badgeColor = 'success';
+                                                                    break;
+                                                                case '취소':
+                                                                    badgeColor = 'danger';
+                                                                    break;
+                                                                default:
+                                                                    badgeColor = 'secondary';
+                                                            }
+                                                            return (
+                                                                <Badge bg={badgeColor} className="me-1">
+                                                                    {schedule.status}
+                                                                </Badge>
+                                                            );
+                                                        })()}
+                                                    </div>
                                                 </div>
-                                                <div className="ms-2">
-                                                    {(() => {
-                                                        let badgeColor;
-                                                        switch (schedule.status) {
-                                                            case '예정':
-                                                                badgeColor = 'primary';
-                                                                break;
-                                                            case '진행중':
-                                                                badgeColor = 'warning';
-                                                                break;
-                                                            case '완료':
-                                                                badgeColor = 'success';
-                                                                break;
-                                                            case '취소':
-                                                                badgeColor = 'danger';
-                                                                break;
-                                                            default:
-                                                                badgeColor = 'secondary';
-                                                        }
-                                                        return (
-                                                            <Badge bg={badgeColor} className="me-1">
-                                                                {schedule.status}
-                                                            </Badge>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </ListGroup.Item>
-                                    ))}
+                                            </ListGroup.Item>
+                                        ))}
                                     </ListGroup>
-                                    
+
                                     {/* 오늘 할일 페이지네이션 */}
                                     {todaySchedules.length > 0 && (
                                         <div className="d-flex justify-content-center mt-3">
@@ -672,7 +702,7 @@ const Home = () => {
                                             </Pagination>
                                         </div>
                                     )}
-                                    
+
                                     <div className="text-center text-muted small mt-2">
                                         총 {todaySchedules.length}개 중 {((todaySchedulesPage - 1) * itemsPerPage) + 1}~{Math.min(todaySchedulesPage * itemsPerPage, todaySchedules.length)}개 표시
                                     </div>
@@ -695,7 +725,7 @@ const Home = () => {
                 </Col>
 
                 {/* 최근 활동 */}
-                <Col md={4} className="mb-4">
+                <Col md={6} className="mb-4">
                     <Card>
                         <Card.Header>
                             <h5 className="mb-0">
@@ -714,29 +744,29 @@ const Home = () => {
                             ) : recentActivities.length > 0 ? (
                                 <>
                                     {getCurrentPageData(recentActivities, recentActivitiesPage).map((activity) => (
-                                    <div key={activity._id} className="d-flex justify-content-between align-items-start mb-3">
-                                        <div className="flex-grow-1">
-                                            <div className="d-flex align-items-center mb-1">
-                                                <strong className="me-2">{activity.title}</strong>
-                                                {getStatusBadge(activity.status)}
+                                        <div key={activity._id} className="d-flex justify-content-between align-items-start mb-3">
+                                            <div className="flex-grow-1">
+                                                <div className="d-flex align-items-center mb-1">
+                                                    <strong className="me-2">{activity.title}</strong>
+                                                    {getStatusBadge(activity.status)}
+                                                </div>
+                                                <small className="text-muted d-block">
+                                                    {activity.description || `${activity.type} - ${activity.location}`}
+                                                </small>
+                                                <small className="text-muted d-flex align-items-center">
+                                                    <FaUser className="me-1" />
+                                                    {activity.publisher?.name || '알 수 없음'}
+                                                    {activity.publisher?._id === user._id && (
+                                                        <Badge bg="info" className="ms-1">본인</Badge>
+                                                    )}
+                                                </small>
+                                                <small className="text-muted">
+                                                    {new Date(activity.date).toLocaleDateString('ko-KR')} {formatTime(activity.time)}
+                                                </small>
                                             </div>
-                                            <small className="text-muted d-block">
-                                                {activity.description || `${activity.type} - ${activity.location}`}
-                                            </small>
-                                            <small className="text-muted d-flex align-items-center">
-                                                <FaUser className="me-1" />
-                                                {activity.publisher?.name || '알 수 없음'}
-                                                {activity.publisher?._id === user._id && (
-                                                    <Badge bg="info" className="ms-1">본인</Badge>
-                                                )}
-                                            </small>
-                                            <small className="text-muted">
-                                                {new Date(activity.date).toLocaleDateString('ko-KR')} {formatTime(activity.time)}
-                                            </small>
                                         </div>
-                                    </div>
                                     ))}
-                                    
+
                                     {/* 최근활동 페이지네이션 */}
                                     {recentActivities.length > 0 && (
                                         <div className="d-flex justify-content-center mt-3">
@@ -750,7 +780,7 @@ const Home = () => {
                                             </Pagination>
                                         </div>
                                     )}
-                                    
+
                                     <div className="text-center text-muted small mt-2">
                                         총 {recentActivities.length}개 중 {((recentActivitiesPage - 1) * itemsPerPage) + 1}~{Math.min(recentActivitiesPage * itemsPerPage, recentActivities.length)}개 표시
                                     </div>
@@ -759,6 +789,79 @@ const Home = () => {
                                 <div className="text-center py-3">
                                     <FaClock size={24} className="text-muted mb-2" />
                                     <p className="text-muted mb-0">최근 활동이 없습니다.</p>
+                                </div>
+                            )}
+                        </Card.Body>
+                    </Card>
+                </Col>
+
+                {/* 뉴스 */}
+                <Col md={12} className="mb-4">
+                    <Card>
+                        <Card.Header>
+                            <h5 className="mb-0">
+                                <FaNewspaper className="me-2" />
+                                최신 뉴스
+                            </h5>
+                        </Card.Header>
+                        <Card.Body>
+                            {newsLoading ? (
+                                <div className="text-center py-3">
+                                    <div className="spinner-border spinner-border-sm" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                    <small className="text-muted d-block mt-1">뉴스를 불러오는 중...</small>
+                                </div>
+                            ) : news.length > 0 ? (
+                                <>
+                                    {getCurrentPageData(news, newsPage).map((newsItem) => (
+                                        <div
+                                            key={newsItem._id}
+                                            className="d-flex justify-content-between align-items-start mb-3"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => handleNewsClick(newsItem)}
+                                        >
+                                            <div className="flex-grow-1">
+                                                <div className="mb-1">
+                                                    <strong className="text-dark">{newsItem.title}</strong>
+                                                </div>
+                                                {newsItem.subtitle && (
+                                                    <small className="text-muted d-block mb-1">
+                                                        {newsItem.subtitle}
+                                                    </small>
+                                                )}
+                                            </div>
+                                            <div className="ms-2 text-end">
+                                                <small className="text-muted">
+                                                    {formatNewsDate(newsItem.publishDate)}
+                                                </small>
+
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* 뉴스 페이지네이션 */}
+                                    {news.length > itemsPerPage && (
+                                        <div className="d-flex justify-content-center mt-3">
+                                            <Pagination className="mb-0">
+                                                {createHomePagination(
+                                                    newsPage,
+                                                    getTotalPages(news),
+                                                    setNewsPage,
+                                                    'home-news'
+                                                )}
+                                            </Pagination>
+                                        </div>
+                                    )}
+
+                                    <div className="text-center text-muted small mt-2">
+                                        총 {news.length}개 중 {((newsPage - 1) * itemsPerPage) + 1}~{Math.min(newsPage * itemsPerPage, news.length)}개 표시
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center py-3">
+                                    <FaNewspaper size={24} className="text-muted mb-2" />
+                                    <p className="text-muted mb-0">등록된 뉴스가 없습니다.</p>
                                 </div>
                             )}
                         </Card.Body>
@@ -785,15 +888,15 @@ const Home = () => {
                 <Container>
                     <Row>
                         <Col md={6}>
-                            <h6 style={{color: '#495057', marginBottom: '15px'}}>부동산 CRM 시스템</h6>
-                            <p style={{color: '#6c757d', fontSize: '0.9rem', margin: 0}}>
+                            <h6 style={{ color: '#495057', marginBottom: '15px' }}>부동산 CRM 시스템</h6>
+                            <p style={{ color: '#6c757d', fontSize: '0.9rem', margin: 0 }}>
                                 효율적인 부동산 중개업무를 위한 종합 관리 시스템
                             </p>
                         </Col>
                         <Col md={6} className="text-end">
-                            <div style={{marginBottom: '15px'}}>
-                                <a 
-                                    href="/terms-of-service" 
+                            <div style={{ marginBottom: '15px' }}>
+                                <a
+                                    href="/terms-of-service"
                                     style={{
                                         color: '#6c757d',
                                         textDecoration: 'none',
@@ -805,8 +908,8 @@ const Home = () => {
                                 >
                                     이용약관
                                 </a>
-                                <a 
-                                    href="/privacy-policy" 
+                                <a
+                                    href="/privacy-policy"
                                     style={{
                                         color: '#6c757d',
                                         textDecoration: 'none',
@@ -817,7 +920,7 @@ const Home = () => {
                                 >
                                     개인정보처리방침
                                 </a>
-                                <button 
+                                <button
                                     onClick={() => setShowCompanyInfoModal(true)}
                                     style={{
                                         color: '#6c757d',
@@ -835,7 +938,7 @@ const Home = () => {
                                     회사 정보
                                 </button>
                             </div>
-                            <p style={{color: '#6c757d', fontSize: '0.8rem', margin: 0}}>
+                            <p style={{ color: '#6c757d', fontSize: '0.8rem', margin: 0 }}>
                                 © 2024 부동산 CRM. All rights reserved.
                             </p>
                         </Col>
@@ -844,9 +947,9 @@ const Home = () => {
             </footer>
 
             {/* 회사 정보 모달 */}
-            <CompanyInfoModal 
-                show={showCompanyInfoModal} 
-                onHide={() => setShowCompanyInfoModal(false)} 
+            <CompanyInfoModal
+                show={showCompanyInfoModal}
+                onHide={() => setShowCompanyInfoModal(false)}
             />
         </Container>
     );
